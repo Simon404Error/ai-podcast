@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI 播客 - AI Podcast Generator</title>
+  <title>AI 播客 - 文稿转播客音频</title>
   <link rel="stylesheet" href="/style.css">
 </head>
 <body>
@@ -17,200 +17,242 @@
           <path d="M12 18v4M8 22h8"/>
         </svg>
         <h1>AI 播客</h1>
+        <span class="header-subtitle">文稿转播客音频</span>
       </div>
       <div class="header-right">
-        <button id="modeToggle" class="mode-toggle" title="切换AI生成模式">AI生成</button>
-        <span id="apiStatus" class="status-badge ready">Edge TTS 就绪</span>
+        <button id="modeToggle" class="mode-toggle">AI 生成</button>
       </div>
     </header>
 
     <!-- Main Content -->
     <main class="main">
-      <!-- Left Panel: Input -->
-      <section class="panel input-panel">
+      <!-- Left: Script Input -->
+      <section class="panel editor-panel">
         <div class="panel-header">
-          <h2 id="panelTitle">导入文稿</h2>
-          <div class="header-actions">
-            <label class="file-upload-btn" title="从文件导入">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
-              </svg>
-              <input type="file" id="fileInput" accept=".md,.txt" />
-            </label>
+          <div class="panel-title-row">
+            <h2>📄 文稿编辑</h2>
+            <div class="header-actions">
+              <label class="action-btn" title="从文件导入">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+                </svg>
+                <span>导入</span>
+                <input type="file" id="fileInput" accept=".md,.txt" />
+              </label>
+            </div>
+          </div>
+          <div id="modeHint" class="mode-desc">粘贴播客文稿，自动识别对话并合成音频</div>
+        </div>
+
+        <!-- Import mode -->
+        <div id="mode-import" class="mode-content">
+          <textarea id="scriptInput" placeholder="粘贴播客文稿...&#10;&#10;支持格式：&#10;小竹：大家好，欢迎收听今天的播客。&#10;溪溪老师：大家好，我是溪溪老师。&#10;&#10;也支持带 emoji 前缀（🎙️ 小竹：xxx）和 Markdown 文件。"></textarea>
+          <div class="editor-footer">
+            <span class="char-count"><span id="scriptCharCount">0</span> 字 · <span id="scriptLineCount">0</span> 行对话</span>
           </div>
         </div>
 
-        <!-- Script import mode (primary) -->
-        <div id="mode-import" class="mode-content">
-          <textarea
-            id="scriptInput"
-            placeholder="粘贴播客文稿...&#10;&#10;格式示例：&#10;🎙️ 小竹：大家好，欢迎收听今天的播客。&#10;🎓 溪溪老师：大家好，我是溪溪老师。&#10;&#10;支持 Markdown 文件，自动识别主持人名称和对话内容。"
-            rows="14"
-          ></textarea>
-          <div class="char-count"><span id="scriptCharCount">0</span> 字 · <span id="scriptLineCount">0</span> 行对话</div>
-        </div>
-
-        <!-- AI generation mode (secondary, hidden by default) -->
+        <!-- AI mode -->
         <div id="mode-ai" class="mode-content hidden">
-          <textarea
-            id="aiTextInput"
-            placeholder="粘贴你想转换为播客的文章、新闻或任何文字内容..."
-            rows="8"
-          ></textarea>
-          <div class="char-count"><span id="aiCharCount">0</span> 字</div>
-          <div class="lang-select" style="padding: 8px 0;">
-            <label>语言：</label>
-            <select id="aiLanguage">
+          <textarea id="aiTextInput" placeholder="输入文章内容或主题，AI 自动生成双人播客对话..."></textarea>
+          <div class="ai-extra">
+            <select id="aiLanguage" class="simple-select">
               <option value="zh">中文</option>
               <option value="en">English</option>
             </select>
-          </div>
-        </div>
-
-        <!-- Host Configuration -->
-        <div class="config-section">
-          <h3>主持人配置</h3>
-          
-          <div class="host-config">
-            <div class="host-card host-a">
-              <div class="host-avatar host-avatar-a">A</div>
-              <div class="host-details">
-                <input type="text" id="hostAName" value="小竹" placeholder="主持人A名字" class="host-name-input" />
-                <select id="hostAStyle" class="ai-only">
-                  <option value="热情、好奇、善于提问">热情好奇型</option>
-                  <option value="专业、严谨、善于总结">专业严谨型</option>
-                  <option value="幽默、轻松、善于调侃">幽默轻松型</option>
-                  <option value="温和、细腻、善于共情">温和细腻型</option>
-                </select>
-                <select id="voiceA">
-                  <option value="xiaoxiao">晓晓 - 温柔女声</option>
-                  <option value="xiaoyi">晓依 - 活泼女声</option>
-                  <option value="xiaochen">晓辰 - 沉稳女声</option>
-                  <option value="yunxi">云希 - 深邃男声</option>
-                  <option value="yunjian">云健 - 自然男声</option>
-                  <option value="yunyang">云扬 - 播音男声</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="host-card host-b">
-              <div class="host-avatar host-avatar-b">B</div>
-              <div class="host-details">
-                <input type="text" id="hostBName" value="溪溪老师" placeholder="主持人B名字" class="host-name-input" />
-                <select id="hostBStyle" class="ai-only">
-                  <option value="理性、深度、善于分析">理性分析型</option>
-                  <option value="幽默、轻松、善于调侃">幽默轻松型</option>
-                  <option value="专业、严谨、善于总结">专业严谨型</option>
-                  <option value="温和、细腻、善于共情">温和细腻型</option>
-                </select>
-                <select id="voiceB">
-                  <option value="yunxi">云希 - 深邃男声</option>
-                  <option value="yunjian">云健 - 自然男声</option>
-                  <option value="yunyang">云扬 - 播音男声</option>
-                  <option value="xiaoxiao">晓晓 - 温柔女声</option>
-                  <option value="xiaoyi">晓依 - 活泼女声</option>
-                  <option value="xiaochen">晓辰 - 沉稳女声</option>
-                </select>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <button id="generateBtn" class="btn-primary">
-          <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polygon points="5 3 19 12 5 21 5 3"/>
-          </svg>
-          <span id="btnLabel">生成音频</span>
-        </button>
-
-        <div class="mode-hint">
-          <span id="modeHint">粘贴文稿，自动解析并合成播客音频。也支持 .md / .txt 文件导入。</span>
-        </div>
-      </section>
-
-      <!-- Right Panel: Output -->
-      <section class="panel output-panel">
-        <div class="panel-header">
-          <h2>播客预览</h2>
-          <div class="output-tabs">
-            <button class="tab active" data-output="script">文稿</button>
-            <button class="tab" data-output="audio">音频</button>
-          </div>
-        </div>
-
-        <!-- Script View -->
-        <div class="output-content" id="output-script">
-          <div id="scriptPlaceholder" class="placeholder">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" class="placeholder-icon">
-              <path d="M12 2a4 4 0 0 1 4 4v4a4 4 0 0 1-8 0V6a4 4 0 0 1 4-4z"/>
-              <path d="M6 12a6 6 0 0 0 12 0"/>
-              <path d="M12 18v4M8 22h8"/>
-            </svg>
-            <p>粘贴文稿后点击「生成音频」，自动解析对话并合成播客</p>
-          </div>
-          <div id="scriptContent" class="script-content hidden"></div>
-        </div>
-
-        <!-- Audio View -->
-        <div class="output-content hidden" id="output-audio">
-          <div id="audioPlaceholder" class="placeholder">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" class="placeholder-icon">
-              <path d="M9 18V5l12-2v13"/>
-              <circle cx="6" cy="18" r="3"/>
-              <circle cx="18" cy="16" r="3"/>
-            </svg>
-            <p>生成音频后可在此播放</p>
-          </div>
-          <div id="audioContent" class="audio-content hidden">
-            <div id="audioPlayer" class="audio-player">
-              <div class="now-playing">
-                <div class="playing-animation">
-                  <span></span><span></span><span></span><span></span><span></span>
-                </div>
-                <div class="playing-info">
-                  <span id="currentSpeaker" class="current-speaker">—</span>
-                  <span id="currentText" class="current-text">点击播放开始收听</span>
-                </div>
-              </div>
-              <div class="player-controls">
-                <button id="prevBtn" class="ctrl-btn" title="上一段">
-                  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
-                </button>
-                <button id="playBtn" class="ctrl-btn play-btn" title="播放">
-                  <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                </button>
-                <button id="nextBtn" class="ctrl-btn" title="下一段">
-                  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
-                </button>
-              </div>
-              <div class="progress-bar" id="progressBar">
-                <div class="progress-fill" id="progressFill"></div>
-              </div>
-              <div class="time-display">
-                <span id="currentTime">00:00</span>
-                <span id="totalTime">00:00</span>
-              </div>
-            </div>
-            <div id="segmentList" class="segment-list"></div>
-          </div>
-        </div>
-
-        <!-- Loading State -->
-        <div id="loadingState" class="loading-state hidden">
-          <div class="spinner"></div>
-          <p id="loadingText">正在解析文稿...</p>
-          <div class="progress-steps">
-            <div class="step" id="stepParse">
-              <span class="step-dot"></span>
-              <span>解析对话内容</span>
-            </div>
-            <div class="step" id="stepAudio">
-              <span class="step-dot"></span>
-              <span>合成音频</span>
-            </div>
+            <span class="char-count" style="margin-left:auto"><span id="aiCharCount">0</span> 字</span>
           </div>
         </div>
       </section>
+
+      <!-- Right: Config + Output -->
+      <div class="right-col">
+        <!-- Voice Configuration -->
+        <section class="panel voice-panel">
+          <div class="panel-header">
+            <h2>🎤 音色配置</h2>
+          </div>
+
+          <div class="voice-config-grid">
+            <!-- Host A -->
+            <div class="voice-card host-a">
+              <div class="voice-card-top">
+                <div class="voice-avatar host-a-avatar">
+                  <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-7 8-7s8 3 8 7" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+                </div>
+                <div class="voice-card-info">
+                  <input type="text" id="hostAName" value="小竹" class="name-input" />
+                  <select id="voiceA" class="voice-select">
+                    <option value="xiaoxiao">晓晓 · 温柔女声</option>
+                    <option value="xiaoyi">晓依 · 活泼女声</option>
+                    <option value="xiaochen">晓辰 · 沉稳女声</option>
+                    <option value="yunxi">云希 · 深邃男声</option>
+                    <option value="yunjian">云健 · 自然男声</option>
+                    <option value="yunyang">云扬 · 播音男声</option>
+                  </select>
+                  <select id="hostAStyle" class="ai-only voice-select" style="display:none">
+                    <option value="热情、好奇、善于提问">热情好奇型</option>
+                    <option value="专业、严谨、善于总结">专业严谨型</option>
+                    <option value="幽默、轻松、善于调侃">幽默轻松型</option>
+                    <option value="温和、细腻、善于共情">温和细腻型</option>
+                  </select>
+                </div>
+              </div>
+              <div class="voice-sliders">
+                <div class="slider-group">
+                  <div class="slider-label">
+                    <span>语速</span>
+                    <span class="slider-val" id="speedAVal">1.0x</span>
+                  </div>
+                  <input type="range" id="voiceASpeed" min="-50" max="100" value="5" step="5" class="slider" />
+                </div>
+                <div class="slider-group">
+                  <div class="slider-label">
+                    <span>语调</span>
+                    <span class="slider-val" id="pitchAVal">0</span>
+                  </div>
+                  <input type="range" id="voiceAPitch" min="-20" max="20" value="0" step="1" class="slider" />
+                </div>
+                <div class="slider-group">
+                  <div class="slider-label">
+                    <span>音量</span>
+                    <span class="slider-val" id="volumeAVal">100%</span>
+                  </div>
+                  <input type="range" id="voiceAVolume" min="-50" max="0" value="0" step="5" class="slider" />
+                </div>
+              </div>
+            </div>
+
+            <!-- Host B -->
+            <div class="voice-card host-b">
+              <div class="voice-card-top">
+                <div class="voice-avatar host-b-avatar">
+                  <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-7 8-7s8 3 8 7" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+                </div>
+                <div class="voice-card-info">
+                  <input type="text" id="hostBName" value="溪溪老师" class="name-input" />
+                  <select id="voiceB" class="voice-select">
+                    <option value="yunxi">云希 · 深邃男声</option>
+                    <option value="yunjian">云健 · 自然男声</option>
+                    <option value="yunyang">云扬 · 播音男声</option>
+                    <option value="xiaoxiao">晓晓 · 温柔女声</option>
+                    <option value="xiaoyi">晓依 · 活泼女声</option>
+                    <option value="xiaochen">晓辰 · 沉稳女声</option>
+                  </select>
+                  <select id="hostBStyle" class="ai-only voice-select" style="display:none">
+                    <option value="理性、深度、善于分析">理性分析型</option>
+                    <option value="幽默、轻松、善于调侃">幽默轻松型</option>
+                    <option value="专业、严谨、善于总结">专业严谨型</option>
+                    <option value="温和、细腻、善于共情">温和细腻型</option>
+                  </select>
+                </div>
+              </div>
+              <div class="voice-sliders">
+                <div class="slider-group">
+                  <div class="slider-label">
+                    <span>语速</span>
+                    <span class="slider-val" id="speedBVal">1.0x</span>
+                  </div>
+                  <input type="range" id="voiceBSpeed" min="-50" max="100" value="5" step="5" class="slider" />
+                </div>
+                <div class="slider-group">
+                  <div class="slider-label">
+                    <span>语调</span>
+                    <span class="slider-val" id="pitchBVal">0</span>
+                  </div>
+                  <input type="range" id="voiceBPitch" min="-20" max="20" value="0" step="1" class="slider" />
+                </div>
+                <div class="slider-group">
+                  <div class="slider-label">
+                    <span>音量</span>
+                    <span class="slider-val" id="volumeBVal">100%</span>
+                  </div>
+                  <input type="range" id="voiceBVolume" min="-50" max="0" value="0" step="5" class="slider" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button id="generateBtn" class="btn-generate">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+              <polygon points="5 3 19 12 5 21 5 3"/>
+            </svg>
+            <span id="btnLabel">生成音频</span>
+          </button>
+        </section>
+
+        <!-- Output -->
+        <section class="panel output-panel">
+          <div class="panel-header">
+            <div class="output-tabs">
+              <button class="tab active" data-output="script">文稿预览</button>
+              <button class="tab" data-output="audio">音频播放</button>
+            </div>
+          </div>
+
+          <!-- Loading -->
+          <div id="loadingState" class="loading-state hidden">
+            <div class="spinner"></div>
+            <p id="loadingText">正在解析文稿...</p>
+            <div class="progress-bar-wrap">
+              <div class="progress-bar-fill" id="genProgress"></div>
+            </div>
+          </div>
+
+          <!-- Script View -->
+          <div class="output-content" id="output-script">
+            <div id="scriptPlaceholder" class="placeholder">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" class="placeholder-icon">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
+              </svg>
+              <p>粘贴文稿，点击生成音频</p>
+            </div>
+            <div id="scriptContent" class="script-content hidden"></div>
+          </div>
+
+          <!-- Audio View -->
+          <div class="output-content hidden" id="output-audio">
+            <div id="audioPlaceholder" class="placeholder">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" class="placeholder-icon">
+                <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
+              </svg>
+              <p>生成音频后可在此播放</p>
+            </div>
+            <div id="audioContent" class="audio-content hidden">
+              <!-- Player -->
+              <div id="audioPlayer" class="player">
+                <div class="player-main">
+                  <div class="player-now">
+                    <div class="player-art">
+                      <div class="art-bars" id="artBars">
+                        <span></span><span></span><span></span><span></span><span></span>
+                      </div>
+                    </div>
+                    <div class="player-info">
+                      <div id="currentSpeaker" class="player-speaker">—</div>
+                      <div id="currentText" class="player-text">准备播放</div>
+                    </div>
+                  </div>
+                  <div class="player-controls">
+                    <button id="prevBtn" class="ctrl-btn" title="上一段"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg></button>
+                    <button id="playBtn" class="ctrl-btn ctrl-play" title="播放"><svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg></button>
+                    <button id="nextBtn" class="ctrl-btn" title="下一段"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg></button>
+                  </div>
+                </div>
+                <div class="player-progress" id="progressBar">
+                  <div class="player-progress-fill" id="progressFill"></div>
+                </div>
+                <div class="player-time">
+                  <span id="currentTime">00:00</span>
+                  <span id="totalTime">00:00</span>
+                </div>
+              </div>
+              <!-- Segment List -->
+              <div id="segmentList" class="segment-list"></div>
+            </div>
+          </div>
+        </section>
+      </div>
     </main>
   </div>
 
