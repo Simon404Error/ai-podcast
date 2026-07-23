@@ -34,10 +34,11 @@ function getClient() {
   return new OpenAI({ apiKey: key, baseURL: process.env.OPENAI_BASE_URL || 'https://api.deepseek.com' });
 }
 
-function parsePreWrittenScript(rawText, nameA, nameB) {
+// Parse script → detect all unique speakers → return segments with speaker names
+function parsePreWrittenScript(rawText) {
   const lines = rawText.split('\n');
   const segments = [];
-  let alt = 'hostA';
+  const detectedSpeakers = new Set();
 
   for (const line of lines) {
     const t = line.trim();
@@ -58,14 +59,11 @@ function parsePreWrittenScript(rawText, nameA, nameB) {
     const text = m[2].trim();
     if (!text || text.length < 2 || META_KEYS.test(speaker + '：')) continue;
 
-    let voice;
-    if (speaker === nameA || speaker.includes(nameA)) voice = 'hostA';
-    else if (speaker === nameB || speaker.includes(nameB)) voice = 'hostB';
-    else { voice = alt; alt = alt === 'hostA' ? 'hostB' : 'hostA'; }
-
-    segments.push({ speaker, text, voice });
+    detectedSpeakers.add(speaker);
+    segments.push({ speaker, text });
   }
-  return segments;
+
+  return { segments, speakers: [...detectedSpeakers] };
 }
 
 function ttsEdge(text, voiceName, outputPath, rate, pitch, volume) {
@@ -87,22 +85,61 @@ function ttsEdge(text, voiceName, outputPath, rate, pitch, volume) {
   });
 }
 
-async function genAudio(segments, voiceSettings) {
-  const isEn = voiceSettings.language === 'en';
+function resolveVoiceMap(body, speakers, isEn) {
   const vmap = isEn ? EDGE_VOICES_EN : EDGE_VOICES;
+  const defaults = isEn ? ['female', 'male'] : ['xiaoxiao', 'yunxi', 'xiaoyi', 'yunjian'];
+  const map = {};
+
+  // New style: voiceMap from frontend
+  if (body.voiceMap && typeof body.voiceMap === 'object') {
+    speakers.forEach((name, i) => {
+      const cfg = body.voiceMap[name] || {};
+      map[name] = {
+        voice: vmap[cfg.voice] || vmap[defaults[i % defaults.length]],
+        rate: cfg.speed != null ? (cfg.speed >= 0 ? '+' : '') + cfg.speed + '%' : '+5%',
+        pitch: cfg.pitch != null ? (cfg.pitch >= 0 ? '+' : '') + cfg.pitch + 'Hz' : '+0Hz',
+        volume: cfg.volume != null ? (cfg.volume >= 0 ? '+' : '') + cfg.volume + '%' : '+0%',
+      };
+    });
+    return map;
+  }
+
+  // Backward compat: voiceA/voiceB style with hostAName/hostBName
+  const nameA = body.hostAName || speakers[0] || 'Host A';
+  const nameB = body.hostBName || speakers[1] || 'Host B';
+
+  speakers.forEach((name, i) => {
+    const isA = name === nameA || name.includes(nameA);
+    const vk = isA ? (body.voiceA || defaults[0]) : (body.voiceB || defaults[1]);
+    const speedVal = isA ? body.voiceASpeed : body.voiceBSpeed;
+    const pitchVal = isA ? body.voiceAPitch : body.voiceBPitch;
+    const volumeVal = isA ? body.voiceAVolume : body.voiceBVolume;
+
+    map[name] = {
+      voice: vmap[vk] || vmap[defaults[i % defaults.length]],
+      rate: speedVal != null ? (speedVal >= 0 ? '+' : '') + speedVal + '%' : '+5%',
+      pitch: pitchVal != null ? (pitchVal >= 0 ? '+' : '') + pitchVal + 'Hz' : '+0Hz',
+      volume: volumeVal != null ? (volumeVal >= 0 ? '+' : '') + volumeVal + '%' : '+0%',
+    };
+  });
+  return map;
+}
+
+async function genAudio(segments, voiceMap) {
   const audioFiles = [];
+  const vdef = { voice: 'zh-CN-XiaoxiaoNeural', rate: '+5%', pitch: '+0Hz', volume: '+0%' };
+
   for (let i = 0; i < segments.length; i++) {
     const seg = segments[i];
-    const vs = seg.voice === 'hostA' ? voiceSettings.hostA : voiceSettings.hostB;
-    const ttsVoice = vmap[vs.voice] || (seg.voice === 'hostA' ? vmap['xiaoxiao'] : vmap['yunxi']);
+    const cfg = voiceMap[seg.speaker] || vdef;
     const fn = 'seg_' + i + '_' + crypto.randomBytes(4).toString('hex') + '.mp3';
     const fp = path.join(audioDir, fn);
     try {
-      await ttsEdge(seg.text, ttsVoice, fp, vs.rate, vs.pitch, vs.volume);
-      audioFiles.push({ speaker: seg.speaker, text: seg.text, voice: seg.voice, audioUrl: '/audio/' + fn, index: i });
+      await ttsEdge(seg.text, cfg.voice, fp, cfg.rate, cfg.pitch, cfg.volume);
+      audioFiles.push({ speaker: seg.speaker, text: seg.text, audioUrl: '/audio/' + fn, index: i });
     } catch (e) {
       console.error('TTS seg ' + i + ':', e.message);
-      audioFiles.push({ speaker: seg.speaker, text: seg.text, voice: seg.voice, audioUrl: null, error: e.message, index: i });
+      audioFiles.push({ speaker: seg.speaker, text: seg.text, audioUrl: null, error: e.message, index: i });
     }
   }
   return audioFiles;
@@ -116,38 +153,31 @@ app.get('/api/status', (req, res) => {
 
 app.get('/api/voices', (req, res) => res.json({ zh: EDGE_VOICES, en: EDGE_VOICES_EN }));
 
-app.post('/api/parse-script', (req, res) => {
-  const { script, hostAName, hostBName } = req.body;
+// Detect speakers from script
+app.post('/api/detect-speakers', (req, res) => {
+  const { script } = req.body;
   if (!script) return res.status(400).json({ error: 'No script provided' });
-  const segments = parsePreWrittenScript(script, hostAName || 'Host A', hostBName || 'Host B');
-  res.json({ segments, totalSegments: segments.length });
+  const { speakers, segments } = parsePreWrittenScript(script);
+  res.json({ speakers, segmentCount: segments.length });
+});
+
+app.post('/api/parse-script', (req, res) => {
+  const { script } = req.body;
+  if (!script) return res.status(400).json({ error: 'No script provided' });
+  const { segments, speakers } = parsePreWrittenScript(script);
+  res.json({ segments, speakers, totalSegments: segments.length });
 });
 
 app.post('/api/parse-and-generate', async (req, res) => {
-  const { script, hostAName, hostBName, voiceA, voiceB, voiceASpeed, voiceAPitch, voiceAVolume, voiceBSpeed, voiceBPitch, voiceBVolume, language } = req.body;
+  const { script, language } = req.body;
   if (!script) return res.status(400).json({ error: 'No script provided' });
 
-  const voiceSettings = {
-    language: language || 'zh',
-    hostA: {
-      voice: voiceA || 'xiaoxiao',
-      rate: voiceASpeed != null ? (voiceASpeed >= 0 ? '+' : '') + voiceASpeed + '%' : '+5%',
-      pitch: voiceAPitch != null ? (voiceAPitch >= 0 ? '+' : '') + voiceAPitch + 'Hz' : '+0Hz',
-      volume: voiceAVolume != null ? (voiceAVolume >= 0 ? '+' : '') + voiceAVolume + '%' : '+0%',
-    },
-    hostB: {
-      voice: voiceB || 'yunxi',
-      rate: voiceBSpeed != null ? (voiceBSpeed >= 0 ? '+' : '') + voiceBSpeed + '%' : '+5%',
-      pitch: voiceBPitch != null ? (voiceBPitch >= 0 ? '+' : '') + voiceBPitch + 'Hz' : '+0Hz',
-      volume: voiceBVolume != null ? (voiceBVolume >= 0 ? '+' : '') + voiceBVolume + '%' : '+0%',
-    },
-  };
-
   try {
-    const segments = parsePreWrittenScript(script, hostAName || 'Host A', hostBName || 'Host B');
+    const { segments, speakers } = parsePreWrittenScript(script);
     if (!segments.length) return res.status(400).json({ error: 'No dialogue lines found.' });
-    const audioFiles = await genAudio(segments, voiceSettings);
-    res.json({ segments, audioFiles, totalSegments: segments.length });
+    const voiceMap = resolveVoiceMap(req.body, speakers, language === 'en');
+    const audioFiles = await genAudio(segments, voiceMap);
+    res.json({ segments, speakers, audioFiles, totalSegments: segments.length });
   } catch (err) {
     console.error('Parse+generate error:', err.message);
     res.status(500).json({ error: err.message });
@@ -157,8 +187,7 @@ app.post('/api/parse-and-generate', async (req, res) => {
 app.post('/api/generate-full', async (req, res) => {
   const client = getClient();
   if (!client) return res.status(400).json({ error: 'DeepSeek API key not configured.' });
-
-  const { text, url, hostAName, hostBName, hostAStyle, hostBStyle, voiceA, voiceB, voiceASpeed, voiceAPitch, voiceAVolume, voiceBSpeed, voiceBPitch, voiceBVolume, language } = req.body;
+  const { text, url, hostAName, hostBName, hostAStyle, hostBStyle, voiceMap, voiceA, voiceB, voiceASpeed, voiceAPitch, voiceAVolume, voiceBSpeed, voiceBPitch, voiceBVolume, language } = req.body;
   if (!text && !url) return res.status(400).json({ error: 'Provide text or URL' });
 
   const isEn = language === 'en';
@@ -171,12 +200,6 @@ app.post('/api/generate-full', async (req, res) => {
 
   const src = url ? ('URL: ' + url + '\n\n' + (text || 'Discuss this topic')) : text;
 
-  const voiceSettings = {
-    language: language || 'zh',
-    hostA: { voice: voiceA || 'xiaoxiao', rate: voiceASpeed != null ? (voiceASpeed >= 0 ? '+' : '') + voiceASpeed + '%' : '+5%', pitch: voiceAPitch != null ? (voiceAPitch >= 0 ? '+' : '') + voiceAPitch + 'Hz' : '+0Hz', volume: voiceAVolume != null ? (voiceAVolume >= 0 ? '+' : '') + voiceAVolume + '%' : '+0%' },
-    hostB: { voice: voiceB || 'yunxi', rate: voiceBSpeed != null ? (voiceBSpeed >= 0 ? '+' : '') + voiceBSpeed + '%' : '+5%', pitch: voiceBPitch != null ? (voiceBPitch >= 0 ? '+' : '') + voiceBPitch + 'Hz' : '+0Hz', volume: voiceBVolume != null ? (voiceBVolume >= 0 ? '+' : '') + voiceBVolume + '%' : '+0%' },
-  };
-
   try {
     const resp = await client.chat.completions.create({
       model: 'deepseek-chat',
@@ -184,9 +207,10 @@ app.post('/api/generate-full', async (req, res) => {
       temperature: 0.8, max_tokens: 4096,
     });
     const raw = resp.choices[0].message.content.trim();
-    const segments = parsePreWrittenScript(raw, nameA, nameB);
-    const audioFiles = await genAudio(segments, voiceSettings);
-    res.json({ script: raw, segments, audioFiles, totalSegments: segments.length });
+    const { segments, speakers } = parsePreWrittenScript(raw);
+    const vmap = resolveVoiceMap({ hostAName: nameA, hostBName: nameB, voiceA, voiceB, voiceASpeed, voiceAPitch, voiceAVolume, voiceBSpeed, voiceBPitch, voiceBVolume, voiceMap }, speakers, isEn);
+    const audioFiles = await genAudio(segments, vmap);
+    res.json({ script: raw, segments, speakers, audioFiles, totalSegments: segments.length });
   } catch (err) {
     console.error('AI gen error:', err.message);
     res.status(500).json({ error: err.message });

@@ -83,106 +83,21 @@
         <section class="panel voice-panel">
           <div class="panel-header">
             <h2>🎤 音色配置</h2>
+            <div class="header-actions">
+              <button id="detectHostsBtn" class="action-btn" title="从文稿检测主持人">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <span>检测</span>
+              </button>
+              <button id="addHostBtn" class="action-btn" title="添加主持人">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                <span>添加</span>
+              </button>
+            </div>
           </div>
 
           <div class="voice-config-grid">
-            <!-- Host A -->
-            <div class="voice-card host-a">
-              <div class="voice-card-top">
-                <div class="voice-avatar host-a-avatar">
-                  <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-7 8-7s8 3 8 7" fill="none" stroke="currentColor" stroke-width="2"/></svg>
-                </div>
-                <div class="voice-card-info">
-                  <input type="text" id="hostAName" value="小竹" class="name-input" />
-                  <select id="voiceA" class="voice-select">
-                    <option value="xiaoxiao">晓晓 · 温柔女声</option>
-                    <option value="xiaoyi">晓依 · 活泼女声</option>
-                    <option value="xiaochen">晓辰 · 沉稳女声</option>
-                    <option value="yunxi">云希 · 深邃男声</option>
-                    <option value="yunjian">云健 · 自然男声</option>
-                    <option value="yunyang">云扬 · 播音男声</option>
-                  </select>
-                  <select id="hostAStyle" class="ai-only voice-select" style="display:none">
-                    <option value="热情、好奇、善于提问">热情好奇型</option>
-                    <option value="专业、严谨、善于总结">专业严谨型</option>
-                    <option value="幽默、轻松、善于调侃">幽默轻松型</option>
-                    <option value="温和、细腻、善于共情">温和细腻型</option>
-                  </select>
-                </div>
-              </div>
-              <div class="voice-sliders">
-                <div class="slider-group">
-                  <div class="slider-label">
-                    <span>语速</span>
-                    <span class="slider-val" id="speedAVal">1.0x</span>
-                  </div>
-                  <input type="range" id="voiceASpeed" min="-50" max="100" value="5" step="5" class="slider" />
-                </div>
-                <div class="slider-group">
-                  <div class="slider-label">
-                    <span>语调</span>
-                    <span class="slider-val" id="pitchAVal">0</span>
-                  </div>
-                  <input type="range" id="voiceAPitch" min="-20" max="20" value="0" step="1" class="slider" />
-                </div>
-                <div class="slider-group">
-                  <div class="slider-label">
-                    <span>音量</span>
-                    <span class="slider-val" id="volumeAVal">100%</span>
-                  </div>
-                  <input type="range" id="voiceAVolume" min="-50" max="0" value="0" step="5" class="slider" />
-                </div>
-              </div>
-            </div>
-
-            <!-- Host B -->
-            <div class="voice-card host-b">
-              <div class="voice-card-top">
-                <div class="voice-avatar host-b-avatar">
-                  <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-7 8-7s8 3 8 7" fill="none" stroke="currentColor" stroke-width="2"/></svg>
-                </div>
-                <div class="voice-card-info">
-                  <input type="text" id="hostBName" value="溪溪老师" class="name-input" />
-                  <select id="voiceB" class="voice-select">
-                    <option value="yunxi">云希 · 深邃男声</option>
-                    <option value="yunjian">云健 · 自然男声</option>
-                    <option value="yunyang">云扬 · 播音男声</option>
-                    <option value="xiaoxiao">晓晓 · 温柔女声</option>
-                    <option value="xiaoyi">晓依 · 活泼女声</option>
-                    <option value="xiaochen">晓辰 · 沉稳女声</option>
-                  </select>
-                  <select id="hostBStyle" class="ai-only voice-select" style="display:none">
-                    <option value="理性、深度、善于分析">理性分析型</option>
-                    <option value="幽默、轻松、善于调侃">幽默轻松型</option>
-                    <option value="专业、严谨、善于总结">专业严谨型</option>
-                    <option value="温和、细腻、善于共情">温和细腻型</option>
-                  </select>
-                </div>
-              </div>
-              <div class="voice-sliders">
-                <div class="slider-group">
-                  <div class="slider-label">
-                    <span>语速</span>
-                    <span class="slider-val" id="speedBVal">1.0x</span>
-                  </div>
-                  <input type="range" id="voiceBSpeed" min="-50" max="100" value="5" step="5" class="slider" />
-                </div>
-                <div class="slider-group">
-                  <div class="slider-label">
-                    <span>语调</span>
-                    <span class="slider-val" id="pitchBVal">0</span>
-                  </div>
-                  <input type="range" id="voiceBPitch" min="-20" max="20" value="0" step="1" class="slider" />
-                </div>
-                <div class="slider-group">
-                  <div class="slider-label">
-                    <span>音量</span>
-                    <span class="slider-val" id="volumeBVal">100%</span>
-                  </div>
-                  <input type="range" id="voiceBVolume" min="-50" max="0" value="0" step="5" class="slider" />
-                </div>
-              </div>
-            </div>
+            <!-- Dynamic host cards injected by JS -->
+            <div id="hostCardsContainer"></div>
           </div>
 
           <button id="generateBtn" class="btn-generate">
