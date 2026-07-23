@@ -1,4 +1,4 @@
-// ====== State ======
+﻿// ====== State ======
 const state = {
   mode: 'import',
   generating: false,
@@ -267,7 +267,7 @@ function renderScript() {
   ctr.classList.remove('hidden');
   if (!state.segments.length) return;
 
-  state.segments.forEach(seg => {
+  state.segments.forEach((seg, i) => { seg._idx = i;
     const d = document.createElement('div');
     const isA = seg.voice === 'hostA';
     d.className = 'script-segment ' + (isA ? 'host-a' : 'host-b');
@@ -335,6 +335,15 @@ function updateNowPlaying(f) {
   sp.textContent = f.speaker;
   sp.className = 'player-speaker ' + (f.voice === 'hostA' ? 'ha' : 'hb');
   $('#currentText').textContent = f.text;
+  // Sync highlight in script view
+  $('.script-segment').forEach(el => el.classList.remove('playing'));
+  const sel = document.querySelector('.script-segment[data-index=\"' + state.currentSegment + '\"]');
+  const segEls = $$('.script-segment');
+  if (sel) sel.classList.add('playing');
+  // Auto-scroll script view to keep current segment visible
+  if (segEls[state.currentSegment]) {
+    segEls[state.currentSegment].scrollIntoView({block:'nearest',behavior:'smooth'});
+  }
 }
 function highlightSeg(i) {
   $$('.seg-item').forEach(el => {
@@ -359,6 +368,19 @@ function updateTotalTime() {
 }
 
 // ====== Playback Controls ======
+// Expand/collapse output panel
+$('#expandBtn').addEventListener('click', () => {
+  const panel = $('.output-panel');
+  panel.classList.toggle('expanded');
+  const icon = $('#expandBtn svg');
+  if (panel.classList.contains('expanded')) {
+    icon.innerHTML = '<polyline points="4 8 10 14 16 8"/>';
+    panel.scrollIntoView({behavior:'smooth'});
+  } else {
+    icon.innerHTML = '<polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>';
+  }
+});
+
 $('#playBtn').addEventListener('click', () => {
   if (!state.audio && state.audioFiles.length) { loadSegment(state.currentSegment >= 0 ? state.currentSegment : 0); return; }
   if (!state.audio) return;

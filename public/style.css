@@ -43,6 +43,7 @@ body{
   background:var(--bg);color:var(--tx1);min-height:100vh;line-height:1.5;
   -webkit-font-smoothing:antialiased;transition:background .25s,color .25s;
 }
+.hidden{display:none!important}
 .app{max-width:1400px;margin:0 auto;padding:0 20px 32px}
 
 /* ====== Header ====== */
@@ -190,6 +191,9 @@ textarea::placeholder{color:var(--tx3)}
 
 /* ====== Output Panel ====== */
 .output-panel{flex:1;display:flex;flex-direction:column;min-height:400px;max-height:calc(100vh - 420px)}
+.output-panel.expanded{position:fixed;top:0;left:0;right:0;bottom:0;z-index:100;max-height:none;min-height:100vh;border-radius:0;margin:0}
+.output-panel.expanded .script-content{max-height:none}
+.output-panel.expanded .segment-list{max-height:50vh}
 .output-tabs{display:flex;gap:0}
 .output-tabs .tab{
   padding:6px 16px;font-size:13px;border:none;background:transparent;
@@ -198,6 +202,8 @@ textarea::placeholder{color:var(--tx3)}
 }
 .output-tabs .tab.active{color:var(--tx1);border-bottom-color:var(--ac)}
 .output-tabs .tab:hover:not(.active){color:var(--tx2)}
+.expand-btn{display:flex;align-items:center;justify-content:center;width:28px;height:28px;border:none;background:transparent;color:var(--tx3);cursor:pointer;border-radius:4px;transition:all .15s;margin-left:auto}
+.expand-btn:hover{color:var(--tx1);background:var(--bg4)}
 .output-content{flex:1;overflow:hidden;display:flex;flex-direction:column}
 .output-content.hidden{display:none}
 
@@ -212,6 +218,7 @@ textarea::placeholder{color:var(--tx3)}
 
 /* Script Content */
 .script-content{padding:12px;overflow-y:auto;flex:1}
+.script-segment.playing{background:var(--acd);border-left-color:var(--ac);transition:background .2s}
 .script-content::-webkit-scrollbar{width:5px}
 .script-content::-webkit-scrollbar-track{background:transparent}
 .script-content::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:3px}
@@ -294,6 +301,8 @@ textarea::placeholder{color:var(--tx3)}
 
 /* Segment List */
 .segment-list{flex:1;overflow-y:auto;padding:8px 18px}
+.seg-item.playing{background:var(--acd)!important}
+.seg-item.played{opacity:.5}
 .segment-list::-webkit-scrollbar{width:5px}
 .segment-list::-webkit-scrollbar-track{background:transparent}
 .segment-list::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:3px}
