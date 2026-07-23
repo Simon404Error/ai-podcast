@@ -38,9 +38,11 @@ function renderHostCards() {
         '</div>' +
         '<div class="voice-card-info">' +
           '<input type="text" class="name-input host-name" value="' + esc(host.name) + '" data-idx="' + i + '" placeholder="主持人名" />' +
+          (host._customVoice ? '<div class="custom-voice-badge">🎤 ' + esc(host._customVoiceLabel || host._customVoice) + '</div>' : '') +
           '<select class="voice-select host-voice" data-idx="' + i + '">' +
             VOICE_OPTIONS.map(o => '<option value="' + o.v + '"' + (host.voice === o.v ? ' selected' : '') + '>' + o.label + '</option>').join('') +
           '</select>' +
+          '<a class="voice-browse-link" data-idx="' + i + '">浏览更多音色...</a>' +
         '</div>' +
         (state.hosts.length > 2
           ? '<button class="host-remove" data-idx="' + i + '" title="移除">×</button>'
@@ -65,6 +67,100 @@ function renderHostCards() {
 
   bindHostEvents();
 }
+
+// Bind browse links after render
+$$('.voice-browse-link').forEach(link => {
+  link.addEventListener('click', () => openVoiceModal(parseInt(link.dataset.idx)));
+});
+
+// ====== Voice Browser Modal ======
+let allVoicesData = null;
+let voiceModalTargetIdx = 0;
+
+async function openVoiceModal(hostIdx) {
+  voiceModalTargetIdx = hostIdx;
+  $('#voiceModal').classList.remove('hidden');
+  $('#voiceSearch').value = '';
+  $('#voiceLocaleFilter').value = '';
+  if (!allVoicesData) {
+    $('#voiceList').innerHTML = '<div class="voice-loading"><div class="spinner"></div>加载 322 个音色...</div>';
+    try {
+      const res = await fetch('/api/all-voices');
+      const data = await res.json();
+      allVoicesData = data;
+    } catch(e) {
+      $('#voiceList').innerHTML = '<div class="voice-loading">加载失败: ' + e.message + '</div>';
+      return;
+    }
+  }
+  renderVoiceList();
+}
+
+function renderVoiceList() {
+  if (!allVoicesData) return;
+  const search = ($('#voiceSearch').value || '').toLowerCase();
+  const locale = $('#voiceLocaleFilter').value;
+  let voices = allVoicesData.voices;
+  if (locale) voices = voices.filter(v => v.Locale.startsWith(locale));
+  if (search) voices = voices.filter(v => v.ShortName.toLowerCase().includes(search) || v.FriendlyName.toLowerCase().includes(search) || v.Locale.toLowerCase().includes(search));
+
+  if (!voices.length) { $('#voiceList').innerHTML = '<div class="voice-loading">无匹配音色</div>'; return; }
+
+  // Group by locale
+  const groups = {};
+  voices.forEach(v => { if (!groups[v.Locale]) groups[v.Locale] = []; groups[v.Locale].push(v); });
+
+  let html = '';
+  for (const [loc, list] of Object.entries(groups).sort()) {
+    const localeLabel = getLocaleLabel(loc);
+    html += '<div class="voice-group"><div class="voice-group-title">' + localeLabel + ' (' + list.length + ')</div>';
+    list.forEach(v => {
+      const genderIcon = v.Gender === 'Female' ? '♀' : v.Gender === 'Male' ? '♂' : '';
+      html += '<div class="voice-item" data-shortname="' + esc(v.ShortName) + '" data-friendly="' + esc(v.FriendlyName) + '">' +
+        '<span class="voice-item-name">' + esc(v.FriendlyName || v.ShortName) + '</span>' +
+        '<span class="voice-item-gender">' + genderIcon + '</span>' +
+        '<span class="voice-item-id">' + esc(v.ShortName) + '</span>' +
+      '</div>';
+    });
+    html += '</div>';
+  }
+  $('#voiceList').innerHTML = html;
+
+  // Click to select
+  $$('.voice-item').forEach(item => {
+    item.addEventListener('click', () => {
+      const shortName = item.dataset.shortname;
+      const friendlyName = item.dataset.friendly;
+      // Add as custom voice option and select it
+      const host = state.hosts[voiceModalTargetIdx];
+      host.voice = shortName;
+      host._customVoice = shortName;
+      host._customVoiceLabel = friendlyName;
+      renderHostCards();
+      closeVoiceModal();
+    });
+  });
+}
+
+function getLocaleLabel(loc) {
+  const map = {
+    'zh-CN':'中文普通话','zh-CN-liaoning':'中文辽宁','zh-CN-shaanxi':'中文陕西',
+    'zh-HK':'粤语','zh-TW':'中文台湾',
+    'en-US':'英语(美)','en-GB':'英语(英)','en-AU':'英语(澳)','en-CA':'英语(加)',
+    'en-IN':'英语(印)','ja-JP':'日语','ko-KR':'韩语','fr-FR':'法语',
+    'de-DE':'德语','es-ES':'西班牙语','it-IT':'意大利语','pt-BR':'葡萄牙语',
+    'ru-RU':'俄语','ar-SA':'阿拉伯语','th-TH':'泰语','vi-VN':'越南语',
+    'id-ID':'印尼语','ms-MY':'马来语','hi-IN':'印地语','tr-TR':'土耳其语',
+  };
+  return map[loc] || loc;
+}
+
+function closeVoiceModal() { $('#voiceModal').classList.add('hidden'); }
+
+$('#voiceModalClose').addEventListener('click', closeVoiceModal);
+$('#voiceModal .voice-modal-bg').addEventListener('click', closeVoiceModal);
+$('#voiceSearch').addEventListener('input', renderVoiceList);
+$('#voiceLocaleFilter').addEventListener('change', renderVoiceList);
 
 function bindHostEvents() {
   // Name changes
