@@ -1,4 +1,4 @@
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+﻿*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 
 /* ====== Themes ====== */
 :root,[data-theme="dark"]{
@@ -62,7 +62,7 @@ body{
   background:var(--bg3);color:var(--tx2);border-radius:20px;
   cursor:pointer;transition:all .15s;font-family:inherit;
 }
-.mode-toggle:hover{background:var(--bg4);color:var(--tx1)}
+.mode-toggle:hover{background:var(--bg4);color:var(--tx1)}.save-btn{display:flex;align-items:center;gap:5px;padding:6px 14px;font-size:12px;border:1px solid var(--bdr);background:var(--bg3);color:var(--tx2);border-radius:20px;cursor:pointer;transition:all .15s;font-family:inherit}.save-btn:hover{background:var(--bg4);color:var(--tx1)}.save-btn.saved{background:var(--acd);border-color:var(--ac);color:var(--ac)}
 
 /* Theme Switcher */
 .theme-switcher{display:flex;gap:3px;background:var(--bg3);border-radius:20px;padding:2px}
@@ -341,7 +341,7 @@ textarea::placeholder{color:var(--tx3)}
 }
 
 /* Error */
-.error-banner{
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:200;padding:8px 18px;border-radius:20px;font-size:12px;background:var(--ac);color:#fff;pointer-events:none;opacity:0;transition:opacity .3s}.toast.show{opacity:1}.error-banner{
   background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);
   color:var(--rd);padding:10px 14px;border-radius:6px;
   margin:10px 14px;font-size:12px;

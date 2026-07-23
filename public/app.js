@@ -420,6 +420,76 @@ document.addEventListener('keydown', e => {
 });
 
 // ====== Init ======
+// ====== Save / Restore ======
+function collectState() {
+  return {
+    script: $('#scriptInput').value,
+    aiText: $('#aiTextInput').value,
+    hostAName: $('#hostAName').value,
+    hostBName: $('#hostBName').value,
+    voiceA: $('#voiceA').value,
+    voiceB: $('#voiceB').value,
+    voiceASpeed: $('#voiceASpeed').value,
+    voiceAPitch: $('#voiceAPitch').value,
+    voiceAVolume: $('#voiceAVolume').value,
+    voiceBSpeed: $('#voiceBSpeed').value,
+    voiceBPitch: $('#voiceBPitch').value,
+    voiceBVolume: $('#voiceBVolume').value,
+    mode: state.mode,
+    aiLanguage: $('#aiLanguage').value,
+  };
+}
+
+function saveState() {
+  const data = collectState();
+  localStorage.setItem('ai-podcast-state', JSON.stringify(data));
+  // Brief feedback
+  const btn = $('#saveBtn');
+  btn.classList.add('saved');
+  setTimeout(() => btn.classList.remove('saved'), 1200);
+  showToast('已保存');
+}
+
+function restoreState() {
+  try {
+    const raw = localStorage.getItem('ai-podcast-state');
+    if (!raw) return;
+    const d = JSON.parse(raw);
+    if (d.script) $('#scriptInput').value = d.script; $('#scriptInput').dispatchEvent(new Event('input'));
+    if (d.aiText) $('#aiTextInput').value = d.aiText; $('#aiTextInput').dispatchEvent(new Event('input'));
+    if (d.hostAName) $('#hostAName').value = d.hostAName;
+    if (d.hostBName) $('#hostBName').value = d.hostBName;
+    if (d.voiceA) $('#voiceA').value = d.voiceA;
+    if (d.voiceB) $('#voiceB').value = d.voiceB;
+    if (d.voiceASpeed != null) { $('#voiceASpeed').value = d.voiceASpeed; $('#voiceASpeed').dispatchEvent(new Event('input')); }
+    if (d.voiceAPitch != null) { $('#voiceAPitch').value = d.voiceAPitch; $('#voiceAPitch').dispatchEvent(new Event('input')); }
+    if (d.voiceAVolume != null) { $('#voiceAVolume').value = d.voiceAVolume; $('#voiceAVolume').dispatchEvent(new Event('input')); }
+    if (d.voiceBSpeed != null) { $('#voiceBSpeed').value = d.voiceBSpeed; $('#voiceBSpeed').dispatchEvent(new Event('input')); }
+    if (d.voiceBPitch != null) { $('#voiceBPitch').value = d.voiceBPitch; $('#voiceBPitch').dispatchEvent(new Event('input')); }
+    if (d.voiceBVolume != null) { $('#voiceBVolume').value = d.voiceBVolume; $('#voiceBVolume').dispatchEvent(new Event('input')); }
+    if (d.mode && d.mode !== state.mode) { state.mode = d.mode; updateModeUI(); }
+    if (d.aiLanguage) $('#aiLanguage').value = d.aiLanguage;
+  } catch(e) { /* ignore corrupt state */ }
+}
+
+function showToast(msg) {
+  let t = document.querySelector('.toast');
+  if (!t) { t = document.createElement('div'); t.className = 'toast'; document.body.appendChild(t); }
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._tid); t._tid = setTimeout(() => t.classList.remove('show'), 1500);
+}
+
+// Manual save button
+$('#saveBtn').addEventListener('click', saveState);
+
+// Auto-save (debounced) on any input change
+let autoSaveTimer;
+document.addEventListener('input', e => {
+  if (!e.target.closest('#scriptInput, #aiTextInput, #hostAName, #hostBName, #voiceA, #voiceB, #voiceASpeed, #voiceAPitch, #voiceAVolume, #voiceBSpeed, #voiceBPitch, #voiceBVolume, #aiLanguage')) return;
+  clearTimeout(autoSaveTimer);
+  autoSaveTimer = setTimeout(saveState, 2000);
+});
+
 // Theme switching
 const savedTheme = localStorage.getItem('ai-podcast-theme') || 'dark';
 document.documentElement.setAttribute('data-theme', savedTheme);
@@ -435,3 +505,4 @@ $$('.theme-dot').forEach(d => {
 });
 
 updateModeUI();
+restoreState();
