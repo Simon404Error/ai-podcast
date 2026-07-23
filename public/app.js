@@ -398,4 +398,18 @@ document.addEventListener('keydown', e => {
 });
 
 // ====== Init ======
+// Theme switching
+const savedTheme = localStorage.getItem('ai-podcast-theme') || 'dark';
+document.documentElement.setAttribute('data-theme', savedTheme);
+$$('.theme-dot').forEach(d => {
+  d.classList.toggle('active', d.dataset.theme === savedTheme);
+  d.addEventListener('click', () => {
+    const theme = d.dataset.theme;
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('ai-podcast-theme', theme);
+    $$('.theme-dot').forEach(x => x.classList.remove('active'));
+    d.classList.add('active');
+  });
+});
+
 updateModeUI();
