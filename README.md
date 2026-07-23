@@ -2,12 +2,16 @@
 
 > 粘贴文稿，自动合成双人播客音频。基于 Microsoft Edge TTS，完全免费。
 
+![theme](https://img.shields.io/badge/themes-4-blue) ![tts](https://img.shields.io/badge/TTS-Edge%20TTS-brightgreen) ![license](https://img.shields.io/badge/license-MIT-green)
+
 ## 功能
 
 - **📄 文稿导入** — 粘贴 Markdown 播客脚本，自动解析主持人对话，合成音频
-- **🎭 双人音色** — 支持 6 种中文语音（晓晓、晓依、晓辰、云希、云健、云扬），男女可自由搭配
+- **🎭 双人音色** — 6 种中文语音（晓晓、晓依、晓辰、云希、云健、云扬），男女自由搭配
+- **🎚️ 声音调节** — 每位主持人独立调节语速（0.5x ~ 2.0x）、语调（-20 ~ +20Hz）、音量（50% ~ 100%），滑块实时预览
+- **🎨 四套主题** — 暗黑 / 亮白 / 魅紫 / 岩灰，一键切换，偏好自动保存
 - **📁 文件上传** — 支持 `.md` / `.txt` 文件拖入或上传，自动识别主持人名字
-- **🎧 分段播放** — 逐段播放、上下切换、进度拖拽、自动连播
+- **🎧 分段播放** — 逐段播放、上下切换、进度拖拽、自动连播，带动态频谱动画
 - **📝 文稿预览** — 解析后的对话稿同步展示，主持人区分颜色
 - **🤖 AI 生成**（可选）— 接入 DeepSeek API，输入主题自动生成播客对话稿
 
@@ -27,13 +31,13 @@
 git clone https://github.com/Simon404Error/ai-podcast.git
 cd ai-podcast
 
-# 2. 安装依赖
+# 2. 安装 Node.js 依赖
 npm install
 
 # 3. 安装 Edge TTS（需要 Python 3.8+）
 pip install edge-tts
 
-# 4. （可选）配置 AI 生成功能
+# 4.（可选）配置 AI 生成功能
 cp .env.example .env
 # 编辑 .env，填入 DeepSeek API Key
 
@@ -47,39 +51,43 @@ node server.js
 
 ### 方式一：导入文稿（默认，无需 API Key）
 
-1. 将播客脚本粘贴到左侧文本框
-2. 在「主持人配置」中填写两位主持人的名字（需与文稿中一致）
-3. 选择各自的音色
+1. 将播客脚本粘贴到左侧文本框，或点击「导入」上传 `.md` / `.txt` 文件
+2. 在右侧「音色配置」中确认主持人名字（需与文稿中一致）
+3. 选择各自的音色，调节语速 / 语调 / 音量
 4. 点击「生成音频」
-5. 切换到「音频」标签页，点击播放
+5. 切换到「音频播放」标签页，点击播放收听
+6. 点击右上角色块切换界面主题
 
 ### 方式二：AI 生成（需要 DeepSeek API Key）
 
-1. 点击右上角「AI生成」切换模式
+1. 点击右上角「AI 生成」切换模式
 2. 输入文章内容或 URL
 3. 配置主持人风格和音色
-4. 点击「生成播客」
+4. 点击「AI 生成播客」
 5. AI 自动生成对话稿并合成音频
+
+### 声音参数说明
+
+| 参数 | 范围 | 默认值 | 说明 |
+|---|---|---|---|
+| 语速 | 0.50x ~ 2.00x | 1.05x | 播放速度，睡前磨耳朵建议 0.85x |
+| 语调 | -20 ~ +20 Hz | 0 | 音调高低，正值更尖细，负值更低沉 |
+| 音量 | 50% ~ 100% | 100% | 输出音量，可单独降低某位主持人 |
+
+每位主持人独立设置，互不影响。
 
 ## 文稿格式
 
-支持标准的「主持人名：对话内容」格式，每行一段对话：
+支持标准的「主持人名：对话内容」格式：
 
 ```
 小竹：哈喽大家好，欢迎收听今天的播客。
 溪溪老师：大家好，我是溪溪老师。
 小竹：今天我们来聊聊人工智能对教育的影响。
-溪溪老师：这个话题很有意义，AI确实正在改变教育行业。
+溪溪老师：这个话题很有意义。
 ```
 
-也支持带 emoji 前缀的格式：
-
-```
-🎙️ 小竹：哈喽大家好，欢迎收听今天的播客。
-🎓 溪溪老师：大家好，我是溪溪老师。
-```
-
-程序会自动跳过 Markdown 标题、分隔线、元数据说明等非对话行。
+也支持带 emoji 前缀（`🎙️`、`🎓`）和 Markdown 元数据行，程序会自动跳过。
 
 ## 音色列表
 
@@ -108,7 +116,7 @@ node server.js
 | `GET` | `/api/status` | 服务状态 |
 | `GET` | `/api/voices` | 可用音色列表 |
 | `POST` | `/api/parse-script` | 解析文稿，返回对话分段 |
-| `POST` | `/api/parse-and-generate` | 解析文稿并合成音频 |
+| `POST` | `/api/parse-and-generate` | 解析文稿并合成音频（支持语速/语调/音量） |
 | `POST` | `/api/generate-full` | AI 生成文稿 + 合成音频（需要 API Key） |
 
 ### `POST /api/parse-and-generate`
@@ -120,23 +128,13 @@ node server.js
   "hostBName": "溪溪老师",
   "voiceA": "xiaoxiao",
   "voiceB": "yunxi",
+  "voiceASpeed": 5,
+  "voiceAPitch": 0,
+  "voiceAVolume": 0,
+  "voiceBSpeed": 5,
+  "voiceBPitch": 0,
+  "voiceBVolume": 0,
   "language": "zh"
-}
-```
-
-返回：
-
-```json
-{
-  "segments": [
-    { "speaker": "小竹", "text": "大家好。", "voice": "hostA" },
-    { "speaker": "溪溪老师", "text": "大家好。", "voice": "hostB" }
-  ],
-  "audioFiles": [
-    { "speaker": "小竹", "audioUrl": "/audio/seg_0_xxxx.mp3", "index": 0 },
-    { "speaker": "溪溪老师", "audioUrl": "/audio/seg_1_xxxx.mp3", "index": 1 }
-  ],
-  "totalSegments": 2
 }
 ```
 
@@ -146,10 +144,11 @@ node server.js
 ai-podcast/
 ├── server.js              # Express 后端
 ├── package.json
+├── README.md
 ├── .env.example           # API Key 配置模板
 ├── public/
 │   ├── index.html         # 前端界面
-│   ├── style.css          # 样式（暗色播客主题）
+│   ├── style.css          # 样式（含四套主题变量）
 │   ├── app.js             # 前端逻辑 + 音频播放器
 │   └── audio/             # 生成的音频文件（gitignore）
 └── .gitignore
@@ -161,13 +160,16 @@ ai-podcast/
 A: 文稿导入模式完全免费。TTS 使用 Microsoft Edge TTS，无需任何 API Key。只有 AI 生成模式需要 DeepSeek API Key。
 
 **Q: 支持英文播客吗？**
-A: 支持。AI 生成模式下切换语言为 English 即可。
+A: 支持。AI 生成模式下切换语言为 English，文稿导入模式也可解析英文对话。
 
 **Q: 音频文件存在哪里？**
 A: `public/audio/` 目录，服务每 15 分钟自动清理超过 1 小时的旧文件。
 
 **Q: 为什么解析不到对话？**
-A: 确认主持人名字与文稿中一致（区分大小写和中英文）。格式必须是 `名字：内容` 每行一段。
+A: 确认主持人名字与文稿中一致。格式必须是 `名字：内容` 每行一段，支持全角 `：` 和半角 `:`。
+
+**Q: 如何调整某位主持人的语速？**
+A: 在「音色配置」中找到对应主持人的语速滑块，拖动即可。两个人的语速独立设置。
 
 ## License
 
