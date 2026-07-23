@@ -69,9 +69,6 @@ function renderHostCards() {
 }
 
 // Bind browse links after render
-$$('.voice-browse-link').forEach(link => {
-  link.addEventListener('click', () => openVoiceModal(parseInt(link.dataset.idx)));
-});
 
 // ====== Voice Browser Modal ======
 let allVoicesData = null;
@@ -163,6 +160,10 @@ $('#voiceSearch').addEventListener('input', renderVoiceList);
 $('#voiceLocaleFilter').addEventListener('change', renderVoiceList);
 
 function bindHostEvents() {
+  // Voice browse links
+  $$('.voice-browse-link').forEach(link => {
+    link.addEventListener('click', () => openVoiceModal(parseInt(link.dataset.idx)));
+  });
   // Name changes
   $$('.host-name').forEach(inp => {
     inp.addEventListener('input', () => {
