@@ -38,12 +38,12 @@ function renderHostCards() {
         '</div>' +
         '<div class="voice-card-info">' +
           '<input type="text" class="name-input host-name" value="' + esc(host.name) + '" data-idx="' + i + '" placeholder="主持人名" />' +
-          '<button class="host-preview" data-idx="' + i + '">🔊 试听</button>' +
           (host._customVoice ? '<div class="custom-voice-badge">🎤 ' + esc(host._customVoiceLabel || host._customVoice) + '</div>' : '') +
           '<select class="voice-select host-voice" data-idx="' + i + '">' +
             VOICE_OPTIONS.map(o => '<option value="' + o.v + '"' + (host.voice === o.v ? ' selected' : '') + '>' + o.label + '</option>').join('') +
           '</select>' +
           '<a class="voice-browse-link" data-idx="' + i + '">浏览更多音色...</a>' +
+          '<button class="host-preview" data-idx="' + i + '">中文试听</button>' +
         '</div>' +
         (state.hosts.length > 2
           ? '<button class="host-remove" data-idx="' + i + '" title="移除">×</button>'

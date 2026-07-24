@@ -1,5 +1,5 @@
 .voice-browse-link{font-size:11px;color:var(--ac);cursor:pointer;text-decoration:none;margin-top:2px}
-.voice-browse-link:hover{text-decoration:underline}
+.voice-browse-link:hover{text-decoration:underline}.host-preview{font-size:10px;padding:1px 6px;border:1px solid var(--ac);background:transparent;color:var(--ac);border-radius:3px;cursor:pointer;transition:all .15s;font-family:inherit;white-space:nowrap;line-height:1.4;margin-top:4px}.host-preview:hover{background:var(--acd)}.host-preview.playing{background:var(--ac);color:#fff}
 .custom-voice-badge{font-size:11px;color:var(--ac);background:var(--acd);padding:2px 8px;border-radius:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px}
 .voice-modal{position:fixed;top:0;left:0;right:0;bottom:0;z-index:300;display:flex;align-items:center;justify-content:center}
 .voice-modal.hidden{display:none}
