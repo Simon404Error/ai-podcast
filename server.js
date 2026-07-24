@@ -198,7 +198,7 @@ app.post('/api/preview-voice', async (req, res) => {
   const fn = 'preview_' + crypto.randomBytes(4).toString('hex') + '.mp3';
   const fp = path.join(audioDir, fn);
   try {
-    await ttsEdge(sample, vk, fp, '+20%', pt, vol);
+    await ttsEdge(sample, vk, fp, rate, pt, vol);
     res.json({ audioUrl: '/audio/' + fn });
   } catch (err) {
     console.error('Preview error:', err.message);
