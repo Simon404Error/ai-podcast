@@ -38,6 +38,7 @@ function renderHostCards() {
         '</div>' +
         '<div class="voice-card-info">' +
           '<input type="text" class="name-input host-name" value="' + esc(host.name) + '" data-idx="' + i + '" placeholder="主持人名" />' +
+          '<button class="host-preview" data-idx="' + i + '">🔊 试听</button>' +
           (host._customVoice ? '<div class="custom-voice-badge">🎤 ' + esc(host._customVoiceLabel || host._customVoice) + '</div>' : '') +
           '<select class="voice-select host-voice" data-idx="' + i + '">' +
             VOICE_OPTIONS.map(o => '<option value="' + o.v + '"' + (host.voice === o.v ? ' selected' : '') + '>' + o.label + '</option>').join('') +

@@ -193,7 +193,7 @@ app.post('/api/preview-voice', async (req, res) => {
   const rate = speed != null ? (speed >= 0 ? '+' : '') + speed + '%' : '+5%';
   const pt = pitch != null ? (pitch >= 0 ? '+' : '') + pitch + 'Hz' : '+0Hz';
   const vol = volume != null ? (volume >= 0 ? '+' : '') + volume + '%' : '+0%';
-  const sample = '你好，这是一段语音试听。欢迎使用AI播客。';
+  const sample = '您好，请问有什么需要帮助的吗？';
   const fn = 'preview_' + crypto.randomBytes(4).toString('hex') + '.mp3';
   const fp = path.join(audioDir, fn);
   try {
