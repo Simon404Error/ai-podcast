@@ -313,7 +313,7 @@ function renderHostCards(){
           '<input class="host-name" value="'+esc(h.name)+'" data-idx="'+i+'" placeholder="主持人名">'+
           (h._customVoice?'<div class="custom-voice-badge">🎤 '+esc(h._customLabel||h._customVoice)+'</div>':'')+
           '<select class="host-voice" data-idx="'+i+'">'+voiceOpts+'</select>'+
-          '<a class="voice-browse-link" data-idx="'+i+'">浏览系统语音...</a>'+<button class="host-preview" data-idx="'+i+'">🔊 试听</button>'+
+          '<a class="voice-browse-link" data-idx="'+i+'">浏览系统语音...</a>'+'<button class="host-preview" data-idx="'+i+'">🔊 试听</button>'+
         '</div>'+
         (S.hosts.length>2?'<button class="host-remove" data-idx="'+i+'">&times;</button>':'')+
       '</div>'+
