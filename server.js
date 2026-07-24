@@ -1,4 +1,4 @@
-require('dotenv').config();
+﻿require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const OpenAI = require('openai');
@@ -14,7 +14,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 const PORT = process.env.PORT || 3000;
 const pythonExe = path.join(process.env.USERPROFILE || 'C:\\Users\\lenovo', '.cache', 'codex-runtimes', 'codex-primary-runtime', 'dependencies', 'python', 'python.exe');
-const PY = fs.existsSync(pythonExe) ? pythonExe : 'python';
 // Prefer uv venv Python if available
 const uvPython = path.join(__dirname, '.venv', 'Scripts', 'python.exe');
 const PY = fs.existsSync(uvPython) ? uvPython : (fs.existsSync(pythonExe) ? pythonExe : 'python');
@@ -186,6 +185,25 @@ app.get('/api/status', (req, res) => {
   res.json({ ready: true, tts: 'Edge TTS (free)', ai: !!getClient() ? 'DeepSeek available' : 'AI gen unavailable' });
 });
 app.get('/api/voices', (req, res) => res.json({ zh: EDGE_VOICES, en: EDGE_VOICES_EN }));
+
+// Preview a voice with a short sample
+app.post('/api/preview-voice', async (req, res) => {
+  const { voice, speed, pitch, volume } = req.body;
+  const vk = resolveVoice(voice || 'xiaoxiao');
+  const rate = speed != null ? (speed >= 0 ? '+' : '') + speed + '%' : '+5%';
+  const pt = pitch != null ? (pitch >= 0 ? '+' : '') + pitch + 'Hz' : '+0Hz';
+  const vol = volume != null ? (volume >= 0 ? '+' : '') + volume + '%' : '+0%';
+  const sample = '你好，这是一段语音试听。欢迎使用AI播客。';
+  const fn = 'preview_' + crypto.randomBytes(4).toString('hex') + '.mp3';
+  const fp = path.join(audioDir, fn);
+  try {
+    await ttsEdge(sample, vk, fp, rate, pt, vol);
+    res.json({ audioUrl: '/audio/' + fn });
+  } catch (err) {
+    console.error('Preview error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
 
 app.get('/api/all-voices', async (req, res) => {
   try {

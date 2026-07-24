@@ -164,6 +164,32 @@ function bindHostEvents() {
   $$('.voice-browse-link').forEach(link => {
     link.addEventListener('click', () => openVoiceModal(parseInt(link.dataset.idx)));
   });
+  // Voice preview
+  let previewAudio = null;
+  $$('.host-preview').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      if (previewAudio) { previewAudio.pause(); previewAudio = null; }
+      const idx = parseInt(btn.dataset.idx);
+      const h = state.hosts[idx];
+      $$('.host-preview').forEach(b => b.classList.remove('playing'));
+      btn.classList.add('playing');
+      try {
+        const res = await fetch('/api/preview-voice', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ voice: h.voice || h._customVoice, speed: h.speed, pitch: h.pitch, volume: h.volume }),
+        });
+        const data = await res.json();
+        if (data.audioUrl) {
+          const a = new Audio(data.audioUrl);
+          previewAudio = a;
+          a.onended = () => { previewAudio = null; btn.classList.remove('playing'); };
+          a.onerror = () => { previewAudio = null; btn.classList.remove('playing'); };
+          a.play();
+        }
+      } catch(e) { btn.classList.remove('playing'); }
+    });
+  });
   // Name changes
   $$('.host-name').forEach(inp => {
     inp.addEventListener('input', () => {
