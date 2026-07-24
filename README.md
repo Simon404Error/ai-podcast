@@ -2,10 +2,6 @@
 
 > 粘贴文稿，自动合成双人播客音频。基于 Microsoft Edge TTS，完全免费。
 
-[![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-%E5%9C%A8%E7%BA%BF%E7%89%88-8b5cf6?logo=github)](https://simon404error.github.io/ai-podcast/)
-
-> 🌐 **在线版**：https://simon404error.github.io/ai-podcast/ — 无需安装，浏览器打开即用
-> 🖥️ **本地版**：`node server.js` — 高质量 Edge TTS，322 种音色
 
 ![theme](https://img.shields.io/badge/themes-4-blue) ![tts](https://img.shields.io/badge/TTS-Edge%20TTS-brightgreen) ![license](https://img.shields.io/badge/license-MIT-green)
 
@@ -35,13 +31,6 @@
 | 前端 | 原生 HTML/CSS/JS，零框架依赖 |
 | 包管理 | pnpm (Node.js) + uv (Python) |
 | 持久化 | localStorage（文稿、配置、主题偏好） |
-
-### 🌐 在线版（推荐）
-
-打开 [simon404error.github.io/ai-podcast](https://simon404error.github.io/ai-podcast/) 直接使用，无需安装。
-使用浏览器内置 Web Speech API 进行语音合成，支持 Windows / macOS / Linux / 手机。
-
-### 🖥️ 本地版（高质量 TTS）
 
 ## 快速开始
 
@@ -142,19 +131,6 @@ node server.js
 | `POST` | `/api/detect-speakers` | 检测文稿中所有主持人 |
 | `POST` | `/api/generate-full` | AI 生成文稿 + 合成音频（需要 API Key） |
 
-## 部署
-
-### GitHub Pages（在线版）
-
-`docs/index.html` 是纯静态版本，使用浏览器 Web Speech API，无需后端。
-在仓库 Settings → Pages 中设置 Source 为 `main` 分支的 `/docs` 文件夹即可部署。
-
-### 本地服务
-
-```bash
-node server.js  # 启动 Express 后端 + Edge TTS
-```
-
 ## 项目结构
 
 ```
@@ -170,8 +146,6 @@ ai-podcast/
 │   ├── style.css          # 样式（含四套主题变量）
 │   ├── app.js             # 前端逻辑 + 音频播放器 + 持久化
 │   └── audio/             # 生成的音频文件（gitignore）
-├── docs/
-│   └── index.html      # 静态版（GitHub Pages 在线版）
 └── .gitignore
 ```
 
