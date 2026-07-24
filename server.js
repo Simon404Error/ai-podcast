@@ -193,11 +193,11 @@ app.post('/api/preview-voice', async (req, res) => {
   const rate = speed != null ? (speed >= 0 ? '+' : '') + speed + '%' : '+5%';
   const pt = pitch != null ? (pitch >= 0 ? '+' : '') + pitch + 'Hz' : '+0Hz';
   const vol = volume != null ? (volume >= 0 ? '+' : '') + volume + '%' : '+0%';
-  const sample = '您好，请问有什么需要帮助的吗？';
+  const sample = '您好，请问有什么需要帮助的吗';
   const fn = 'preview_' + crypto.randomBytes(4).toString('hex') + '.mp3';
   const fp = path.join(audioDir, fn);
   try {
-    await ttsEdge(sample, vk, fp, rate, pt, vol);
+    await ttsEdge(sample, vk, fp, '+20%', pt, vol);
     res.json({ audioUrl: '/audio/' + fn });
   } catch (err) {
     console.error('Preview error:', err.message);
