@@ -194,11 +194,11 @@ app.post('/api/preview-voice', async (req, res) => {
   const rate = speed != null ? (speed >= 0 ? '+' : '') + speed + '%' : '+5%';
   const pt = pitch != null ? (pitch >= 0 ? '+' : '') + pitch + 'Hz' : '+0Hz';
   const vol = volume != null ? (volume >= 0 ? '+' : '') + volume + '%' : '+0%';
-  const sample = isEn ? 'How are you? I am fine, thanks.' : '您好，这是一段中文试听测试。';
+  const sample = isEn ? 'How are you? I am fine thanks, and you? I am fine too!' : '衬衫的价格为九磅十五便士，所以答案选C，并标记在答题卡上';
   const fn = 'preview_' + crypto.randomBytes(4).toString('hex') + '.mp3';
   const fp = path.join(audioDir, fn);
   try {
-    const previewRate = '+30%'; await ttsEdge(sample, vk, fp, previewRate, pt, vol);
+    await ttsEdge(sample, vk, fp, rate, pt, vol);
     res.json({ audioUrl: '/audio/' + fn });
   } catch (err) {
     console.error('Preview error:', err.message);
