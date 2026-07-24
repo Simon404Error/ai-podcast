@@ -44,7 +44,8 @@ function renderHostCards() {
           '</select>' +
           '<a class="voice-browse-link" data-idx="' + i + '">浏览更多音色...</a>' +
           '<span class="host-preview-row"><button class="host-preview" data-idx="' + i + '" data-lang="zh">中文试听</button>' +
-          '<button class="host-preview host-preview-en" data-idx="' + i + '" data-lang="en">英文试听</button></span>' +
+          '<button class="host-preview host-preview-en" data-idx="' + i + '" data-lang="en">英文试听</button>' +
+          '<span class="preview-hint">可能有几秒延迟，随后播放试听音频</span></span>' +
         '</div>' +
         (state.hosts.length > 2
           ? '<button class="host-remove" data-idx="' + i + '" title="移除">×</button>'
