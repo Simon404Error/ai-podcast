@@ -1,0 +1,8 @@
+[project]
+name = "ai-podcast"
+version = "0.1.0"
+description = "AI播客生成器 - 文稿转播客音频"
+requires-python = ">=3.8"
+dependencies = [
+    "edge-tts>=7.0.0",
+]

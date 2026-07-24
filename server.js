@@ -15,6 +15,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 const PORT = process.env.PORT || 3000;
 const pythonExe = path.join(process.env.USERPROFILE || 'C:\\Users\\lenovo', '.cache', 'codex-runtimes', 'codex-primary-runtime', 'dependencies', 'python', 'python.exe');
 const PY = fs.existsSync(pythonExe) ? pythonExe : 'python';
+// Prefer uv venv Python if available
+const uvPython = path.join(__dirname, '.venv', 'Scripts', 'python.exe');
+const PY = fs.existsSync(uvPython) ? uvPython : (fs.existsSync(pythonExe) ? pythonExe : 'python');
 const PY_ENV = { ...process.env, PYTHONIOENCODING: 'utf-8' };
 
 const audioDir = path.join(__dirname, 'public', 'audio');

@@ -33,6 +33,7 @@
 | 语音合成 | Microsoft Edge TTS（免费，通过 `edge-tts` Python 库） |
 | AI 文稿 | DeepSeek API（可选，不配置也能用文稿导入模式） |
 | 前端 | 原生 HTML/CSS/JS，零框架依赖 |
+| 包管理 | pnpm (Node.js) + uv (Python) |
 | 持久化 | localStorage（文稿、配置、主题偏好） |
 
 ### 🌐 在线版（推荐）
@@ -50,10 +51,10 @@ git clone https://github.com/Simon404Error/ai-podcast.git
 cd ai-podcast
 
 # 2. 安装 Node.js 依赖
-npm install
+pnpm install
 
 # 3. 安装 Edge TTS（需要 Python 3.8+）
-pip install edge-tts
+uv sync
 
 # 4.（可选）配置 AI 生成功能
 cp .env.example .env
@@ -160,6 +161,8 @@ node server.js  # 启动 Express 后端 + Edge TTS
 ai-podcast/
 ├── server.js              # Express 后端
 ├── package.json
+├── pyproject.toml         # Python 依赖（uv 管理）
+├── pnpm-lock.yaml
 ├── README.md
 ├── .env.example           # API Key 配置模板
 ├── public/

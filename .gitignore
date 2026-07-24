@@ -4,3 +4,7 @@ public/audio/
 *.py
 test_*.js
 test_*.txt
+# uv
+.venv/
+__pycache__/
+*.pyc
