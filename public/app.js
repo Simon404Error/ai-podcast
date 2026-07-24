@@ -43,8 +43,8 @@ function renderHostCards() {
             VOICE_OPTIONS.map(o => '<option value="' + o.v + '"' + (host.voice === o.v ? ' selected' : '') + '>' + o.label + '</option>').join('') +
           '</select>' +
           '<a class="voice-browse-link" data-idx="' + i + '">浏览更多音色...</a>' +
-          '<button class="host-preview" data-idx="' + i + '" data-lang="zh">中文试听</button>' +
-          '<button class="host-preview host-preview-en" data-idx="' + i + '" data-lang="en">英文试听</button>' +
+          '<span class="host-preview-row"><button class="host-preview" data-idx="' + i + '" data-lang="zh">中文试听</button>' +
+          '<button class="host-preview host-preview-en" data-idx="' + i + '" data-lang="en">英文试听</button></span>' +
         '</div>' +
         (state.hosts.length > 2
           ? '<button class="host-remove" data-idx="' + i + '" title="移除">×</button>'
