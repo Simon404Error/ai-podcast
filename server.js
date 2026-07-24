@@ -188,12 +188,13 @@ app.get('/api/voices', (req, res) => res.json({ zh: EDGE_VOICES, en: EDGE_VOICES
 
 // Preview a voice with a short sample
 app.post('/api/preview-voice', async (req, res) => {
+  const isEn = req.body.lang === 'en';
   const { voice, speed, pitch, volume } = req.body;
   const vk = resolveVoice(voice || 'xiaoxiao');
   const rate = speed != null ? (speed >= 0 ? '+' : '') + speed + '%' : '+5%';
   const pt = pitch != null ? (pitch >= 0 ? '+' : '') + pitch + 'Hz' : '+0Hz';
   const vol = volume != null ? (volume >= 0 ? '+' : '') + volume + '%' : '+0%';
-  const sample = '您好，请问有什么需要帮助的吗';
+  const sample = isEn ? 'How are you? I am fine thanks, and you? I am fine too!' : '衬衫的价格为九磅十五便士，所以答案选C，并标记在答题卡上';
   const fn = 'preview_' + crypto.randomBytes(4).toString('hex') + '.mp3';
   const fp = path.join(audioDir, fn);
   try {
